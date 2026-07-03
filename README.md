@@ -140,5 +140,3 @@ python -m http.server 8000
 ## Autoría
 
 Sistema desarrollado como parte del proyecto de investigación sobre deserción estudiantil en UNEMI.
-
-**Contacto:** garcia.evelyn@unemi.edu.ec
