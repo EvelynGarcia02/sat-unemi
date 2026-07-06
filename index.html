@@ -177,7 +177,8 @@
       </svg>
       Panel de Control
     </div>
-    <div class="section-sub">Distribucion de riesgo de desercion — cohortes 8, 9 y 10 (n = 28,375 estudiantes)</div>
+    <div class="section-sub">Distribucion de riesgo de desercion — cohortes 8, 9 y 10 (n = 28,375 estudiantes).
+      Desercion segun Indicador 14 CACES: estudiante sin matricula en el periodo de mitad de carrera (&delta;). Datos academicos con corte a julio 2026.</div>
 
     <!-- CROSS-FILTER CHIP -->
     <div id="cf-chip-area" style="display:none;margin-bottom:14px;align-items:center;gap:8px"></div>
@@ -453,7 +454,7 @@
           </div>
           <div class="insight-content">
             <h4>Factores que aumentan el riesgo</h4>
-            <p>Cohortes recientes, carecer de pareja, mayor edad al ingreso y estar en una provincia distinta a Guayas se asocian a mayor probabilidad de desercion.</p>
+            <p>Cohortes recientes, carecer de pareja, NSE medio y residir fuera de Guayas se asocian a mayor probabilidad de desercion. La edad al ingreso no muestra efecto significativo.</p>
           </div>
         </div>
         <div class="insight-card success">
@@ -503,8 +504,7 @@
             <tr>
               <th>Variable</th>
               <th style="text-align:center">AME (pp)</th>
-              <th style="text-align:center">Error est.</th>
-              <th style="text-align:center">p-valor</th>
+              <th style="text-align:center">p (coef. cloglog)</th>
               <th>Interpretacion</th>
             </tr>
           </thead>
@@ -539,7 +539,7 @@
             </div>
           </div>
           <div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;color:#475569;line-height:1.5">
-            <strong>Tendencia:</strong> La tasa de desercion real ha aumentado 4.1 pp entre la cohorte 8 y la 10, consistente con el efecto AME del cohorte (+1.94 pp por cohorte, p&lt;0.001).
+            <strong>Tendencia:</strong> La tasa de desercion real ha aumentado 4.1 pp entre la cohorte 8 y la 10, consistente con el efecto AME del cohorte (+1.65 pp por cohorte, p&lt;0.001).
           </div>
         </div>
       </div>
@@ -625,6 +625,7 @@
                 <option value="Industrial (Presencial)">Industrial (Presencial)</option>
                 <option value="Derecho (En linea)">Derecho (En linea)</option>
                 <option value="Educacion Especial (Presencial)">Educacion Especial (Presencial)</option>
+                <option value="Lic. en Psicologia 2019 (Presencial)">Lic. en Psicologia 2019 (Presencial)</option>
                 <option value="Trabajo Social (En linea)">Trabajo Social (En linea)</option>
                 <option value="Trabajo Social 2019 (Semipr.)">Trabajo Social 2019 (Semipresencial)</option>
                 <option value="Educacion Inicial (En linea)">Educacion Inicial (En linea)</option>
@@ -656,15 +657,6 @@
             </div>
 
             <div class="form-group">
-              <label>Estado de gratuidad <span>*</span></label>
-              <select id="calc-gratuidad" class="form-control" required>
-                <option value="GC">Gratuidad Completa</option>
-                <option value="PG">Perdida de Gratuidad</option>
-                <option value="SR">Sin Registro</option>
-              </select>
-            </div>
-
-            <div class="form-group">
               <label>Sexo</label>
               <select id="calc-sexo" class="form-control">
                 <option value="F">Mujer</option>
@@ -678,11 +670,6 @@
                 <option value="S">Sin pareja</option>
                 <option value="C">Con pareja</option>
               </select>
-            </div>
-
-            <div class="form-group">
-              <label>Edad al ingreso</label>
-              <input type="number" id="calc-edad" class="form-control" min="16" max="65" value="19" placeholder="Ej: 19">
             </div>
           </div>
 
@@ -698,7 +685,7 @@
         </form>
 
         <div style="margin-top:12px;padding:10px 14px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:11px;color:#0c4a6e;line-height:1.6">
-          <strong>Sobre esta calculadora:</strong> Estima el riesgo usando los efectos marginales promedio (AME) del <strong>modelo explicativo cloglog</strong> (AUC=0.810), cuyo proposito es cuantificar <em>por que</em> ocurre la desercion y que tanto influye cada factor. No es una version simplificada del Ensemble — son dos modelos con propositos distintos: el cloglog explica causas, el Ensemble predice quien deserta.<br>
+          <strong>Sobre esta calculadora:</strong> Es una aproximacion lineal ilustrativa: parte del score mediano de la carrera (Ensemble, cohortes 8-10) y lo ajusta con los efectos marginales promedio (AME) del <strong>modelo explicativo cloglog</strong> (AUC=0.810). No es el modelo predictivo oficial ni una version simplificada del Ensemble — el cloglog explica causas, el Ensemble predice quien deserta. Solo incluye factores con efecto significativo en el modelo (edad y gratuidad no lo son / no forman parte de el).<br>
           Los scores del Sistema de Alertas provienen del <strong>modelo predictivo Ensemble</strong> (LR+RF+XGB, AUC=0.8461). Esta calculadora es complementaria: permite simular escenarios individuales e interpretar el peso de cada variable.
         </div>
         <div id="result-disclaimer" style="display:none"></div>
@@ -789,7 +776,7 @@
         </div>
         <div class="insight-content">
           <h4>Solo variables exogenas</h4>
-          <p>Los predictores son todos disponibles al inicio del primer periodo. <strong>No se usan variables endogenas</strong> (promedio acumulado, becas en t&gt;1), garantizando aplicabilidad real.</p>
+          <p>Los predictores estan disponibles al cierre del primer periodo academico: el score se emite al inicio del segundo periodo. <strong>No se usan variables endogenas</strong> (promedio acumulado, becas en t&gt;1), garantizando aplicabilidad real.</p>
         </div>
       </div>
     </div>
@@ -865,7 +852,7 @@
             <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:7.2%;background:var(--risk-low)"></div></div>
           </div>
           <div style="margin-top:8px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;color:#475569;line-height:1.6">
-            <strong>Umbral Youden (Ensemble):</strong> 0.5432. Zonas operativas: Alto &ge;50%, Medio 25-50%, Bajo &lt;25%.<br>
+            <strong>Umbral Youden (Ensemble):</strong> 0.4161, elegido en validacion interna limpia (cohorte 7, modelos replica entrenados en cohortes 1-6). Zonas operativas: Alto &ge;50%, Medio 25-50%, Bajo &lt;25%.<br>
             <strong>Interpretacion:</strong> 2 de cada 3 estudiantes en zona Alta desertaron realmente. Solo 1 de cada 14 en zona Baja deserto.
           </div>
         </div>

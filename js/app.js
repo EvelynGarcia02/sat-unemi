@@ -660,7 +660,7 @@ function renderFactores() {
 function renderForestPlot() {
   const el = $('#forest-container');
   if (!el) return;
-  const minHR=0.65, maxHR=1.30, rng=maxHR-minHR;
+  const minHR=0.60, maxHR=1.40, rng=maxHR-minHR;
   const sorted = [...DATOS_HR].sort((a,b) => b.hr-a.hr);
 
   el.innerHTML = sorted.map(d => {
@@ -695,7 +695,6 @@ function renderAMETable() {
     return `<tr>
       <td>${d.v}</td>
       <td class="${cls}" style="text-align:center">${arrow} ${d.ame>0?'+':''}${d.ame.toFixed(1)} pp</td>
-      <td style="text-align:center">&plusmn;${d.se.toFixed(1)}</td>
       <td style="text-align:center"><span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${d.p}</span></td>
       <td style="font-size:12px;color:#64748b">${d.nota}</td>
     </tr>`;
@@ -711,7 +710,7 @@ function renderImportanciaChart() {
     type:'bar',
     data: {
       labels: IMPORTANCIA_VARS.map(d=>d.v),
-      datasets:[{ label:'Importancia relativa (RF, %)', data:IMPORTANCIA_VARS.map(d=>d.imp),
+      datasets:[{ label:'Importancia relativa (Ensemble, %)', data:IMPORTANCIA_VARS.map(d=>d.imp),
         backgroundColor:IMPORTANCIA_VARS.map(d=>colores[d.tipo]||'#94a3b8'), borderRadius:4 }]
     },
     options:{
@@ -835,14 +834,16 @@ function renderROCChart() {
    CALCULADORA (usa umbrales del Ensemble)
    ============================================================ */
 function calcScore() {
+  // Aproximacion lineal: score mediano de la carrera (Ensemble) + ajustes AME
+  // del modelo cloglog (Tabla 6, horizonte completo). Solo factores con efecto
+  // significativo: promedio t1, modalidad, sexo, estado civil y cohorte.
+  // Constantes = AME/100 (promedio: AME por 10 pts de 0-100 = 1 pt de 0-10).
   const car   = $('#calc-carrera')?.value || '';
   const mod   = /semipr/i.test(car) ? 'SEMIPRESENCIAL' : /presencial|pres\./i.test(car) ? 'PRESENCIAL' : 'EN LINEA';
   const coh   = parseInt($('#calc-cohorte')?.value || '10');
   const prom  = parseFloat($('#calc-prom')?.value);
-  const grat  = $('#calc-gratuidad')?.value || 'GC';
   const sex   = $('#calc-sexo')?.value || 'F';
   const eciv  = $('#calc-eciv')?.value || 'S';
-  const edad  = parseInt($('#calc-edad')?.value || '19');
 
   if (isNaN(prom) || prom < 0 || prom > 10) {
     alert('Ingrese un promedio valido entre 0 y 10.');
@@ -851,17 +852,14 @@ function calcScore() {
 
   let score = SCORING_CARRERA[car] ?? 0.38;
 
-  score += -(prom - 7) * 0.064;
+  score += -(prom - 7) * 0.060;      // AME promedio: -6.0 pp por 10 pts (0-100)
 
-  if (mod==='PRESENCIAL')     score -= 0.032;
-  if (mod==='SEMIPRESENCIAL') score -= 0.057;
-  if (sex==='F')  score -= 0.036;
-  if (eciv==='S') score += 0.040;
-  if (grat==='PG') score += 0.080;
-  if (grat==='SR') score += 0.025;
+  if (mod==='PRESENCIAL')     score -= 0.030;  // AME -3.0 pp
+  if (mod==='SEMIPRESENCIAL') score -= 0.053;  // AME -5.3 pp
+  if (sex==='F')  score -= 0.034;              // AME -3.4 pp
+  if (eciv==='S') score += 0.037;              // AME +3.7 pp
 
-  score += (coh - 10) * 0.019;
-  if (edad > 22) score += (edad-22)*0.008;
+  score += (coh - 10) * 0.017;                 // AME +1.65 pp por cohorte
 
   score = Math.max(0.02, Math.min(0.97, score));
 
