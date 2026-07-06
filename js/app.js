@@ -129,6 +129,7 @@ function navigate(page) {
    ============================================================ */
 function init() {
   State.students = STUDENTS;
+  renderStaticData();
   applyFilters();
   setupNav();
   setupSidebarFilters();
@@ -259,7 +260,7 @@ function renderDashboardCharts() {
   $('#kpi-alto').textContent  = total ? fmtPct(alto/total*100) : '—';
   $('#kpi-medio').textContent = total ? fmtPct(medio/total*100) : '—';
   $('#kpi-bajo').textContent  = total ? fmtPct(bajo/total*100) : '—';
-  $('#kpi-auc').textContent   = '0.8461';
+  $('#kpi-auc').textContent   = RESUMEN_GLOBAL.auc_roc.toFixed(4);
   $('#kpi-alto-n').textContent  = `${fmt(alto)} estudiantes`;
   $('#kpi-medio-n').textContent = `${fmt(medio)} estudiantes`;
   $('#kpi-bajo-n').textContent  = `${fmt(bajo)} estudiantes`;
@@ -453,12 +454,56 @@ function renderCarreraChart(base) {
 }
 
 /* ============================================================
+   DATOS ESTATICOS DESDE data.js
+   Rellena todos los elementos de index.html que muestran cifras
+   del modelo, para que nunca queden hardcodeadas en el HTML.
+   ============================================================ */
+function renderStaticData() {
+  const zonas = [['A','a'], ['M','m'], ['B','b']];
+  zonas.forEach(([Z, z]) => {
+    const zc = ZONAS_CONFIG[Z];
+    const info = `${zc.umbral} • ${fmt(zc.n)} estudiantes (${zc.pct}%)`;
+    const rate = zc.tasa_real;
+    const setTxt = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+    setTxt(`#zsum-${z}-rate`, rate);
+    setTxt(`#zsum-${z}-info`, info);
+    setTxt(`#zcal-${z}-rate`, rate);
+    setTxt(`#zcal-${z}-info`, info);
+    const bar = $(`#zcal-${z}-bar`);
+    if (bar) bar.style.width = rate;
+  });
+
+  const champ = METRICAS_MODELOS.find(m => m.campeon);
+  const champDesc = $('#champ-desc');
+  if (champ && champDesc) {
+    champDesc.textContent = `Mejor AUC-ROC (${champ.auc.toFixed(4)}), F1=${champ.f1.toFixed(3)} y Brier=${champ.brier.toFixed(4)}. ` +
+      `Combinacion de Regresion Logistica Ridge, Random Forest y XGBoost entrenados en cohortes 1-7.`;
+  }
+
+  const interp = $('#zcal-interp');
+  if (interp) {
+    const pA = parseFloat(ZONAS_CONFIG['A'].tasa_real) / 100;
+    const pB = parseFloat(ZONAS_CONFIG['B'].tasa_real) / 100;
+    const denA = Math.round(1 / (1 - pA));
+    const denB = Math.round(1 / pB);
+    interp.textContent = `${denA - 1} de cada ${denA} estudiantes en zona Alta desertaron realmente. Solo 1 de cada ${denB} en zona Baja deserto.`;
+  }
+}
+
+/* ============================================================
    INSIGHTS
    ============================================================ */
 function renderInsights(alto, medio, bajo, total, base) {
   const topCar = DATOS_CARRERA[0];
   const pctAlto = total ? (alto/total*100).toFixed(1) : 0;
   const pctDeser = total ? (base.filter(s=>s.y===1).length/total*100).toFixed(1) : 0;
+  const tasaAlto = ZONAS_CONFIG['A'].tasa_real;
+  const denAlto  = Math.round(1 / (1 - parseFloat(tasaAlto) / 100));
+  const champ    = METRICAS_MODELOS.find(m => m.campeon) || {};
+  const ameProm  = DATOS_AME.find(d => /Promedio/.test(d.v)) || {};
+  const ratioImp = IMPORTANCIA_VARS.length > 1
+    ? Math.round(IMPORTANCIA_VARS[0].imp / IMPORTANCIA_VARS[1].imp)
+    : null;
 
   const el = $('#insights-container');
   if (!el) return;
@@ -467,7 +512,7 @@ function renderInsights(alto, medio, bajo, total, base) {
       <div class="insight-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
       <div class="insight-content">
         <h4>${pctAlto}% en Riesgo Alto</h4>
-        <p>${fmt(alto)} estudiantes con score &ge; 50%. Desercion real en este grupo: <strong>66%</strong> (1 de cada 2 deserta confirmado).</p>
+        <p>${fmt(alto)} estudiantes con score &ge; 50%. Desercion real en este grupo: <strong>${tasaAlto}</strong> (${denAlto - 1} de cada ${denAlto} deserta confirmado).</p>
       </div>
     </div>
     <div class="insight-card warn">
@@ -481,14 +526,14 @@ function renderInsights(alto, medio, bajo, total, base) {
       <div class="insight-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       <div class="insight-content">
         <h4>Factor protector dominante</h4>
-        <p>El <strong>promedio del 1er periodo</strong> es mas de 8 veces mas importante que el siguiente predictor. Cada 10 puntos adicionales reducen 6.4 pp la desercion.</p>
+        <p>El <strong>promedio del 1er periodo</strong> es ${ratioImp ? `unas ${ratioImp} veces mas importante que el siguiente predictor` : 'el predictor dominante'}. Cada 10 puntos adicionales reducen ${Math.abs(ameProm.ame || 0).toFixed(1)} pp la desercion.</p>
       </div>
     </div>
     <div class="insight-card success">
       <div class="insight-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
       <div class="insight-content">
-        <h4>Modelo Ensemble: AUC 0.8461</h4>
-        <p>Combinacion LR+RF+XGBoost. Identifica correctamente al <strong>68.7% de los desertores</strong>. Brier=0.164. Entrenado en 41,334 est., evaluado en 28,375.</p>
+        <h4>Modelo Ensemble: AUC ${(champ.auc || 0).toFixed(4)}</h4>
+        <p>Combinacion LR+RF+XGBoost. Identifica correctamente al <strong>${((champ.sens || 0) * 100).toFixed(1)}% de los desertores</strong> (umbral Youden). Brier=${(champ.brier || 0).toFixed(4)}. Entrenado en 41,334 est., evaluado en 28,375.</p>
       </div>
     </div>
   `;

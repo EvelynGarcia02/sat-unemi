@@ -192,18 +192,18 @@
       </div>
       <div class="kpi-card kpi-alto">
         <div class="kpi-label">Riesgo Alto</div>
-        <div class="kpi-value" id="kpi-alto">38.5%</div>
-        <div class="kpi-detail" id="kpi-alto-n">10,931 estudiantes</div>
+        <div class="kpi-value" id="kpi-alto">&mdash;</div>
+        <div class="kpi-detail" id="kpi-alto-n">&mdash;</div>
       </div>
       <div class="kpi-card kpi-medio">
         <div class="kpi-label">Riesgo Medio</div>
-        <div class="kpi-value" id="kpi-medio">46.6%</div>
-        <div class="kpi-detail" id="kpi-medio-n">13,236 estudiantes</div>
+        <div class="kpi-value" id="kpi-medio">&mdash;</div>
+        <div class="kpi-detail" id="kpi-medio-n">&mdash;</div>
       </div>
       <div class="kpi-card kpi-bajo">
         <div class="kpi-label">Riesgo Bajo</div>
-        <div class="kpi-value" id="kpi-bajo">14.8%</div>
-        <div class="kpi-detail" id="kpi-bajo-n">4,208 estudiantes</div>
+        <div class="kpi-value" id="kpi-bajo">&mdash;</div>
+        <div class="kpi-detail" id="kpi-bajo-n">&mdash;</div>
       </div>
       <div class="kpi-card kpi-model">
         <div class="kpi-label">Precision del modelo (AUC)</div>
@@ -260,10 +260,10 @@
       <div class="chart-card" style="cursor:pointer;border:2px solid transparent;transition:border 0.2s" onclick="CF.set('zona','A','Riesgo Alto');this.style.borderColor='var(--risk-high)'">
         <div class="chart-header"><div class="chart-title" style="color:var(--risk-high);display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--risk-high);flex-shrink:0"></span> Riesgo ALTO</div></div>
         <div style="padding:8px 0">
-          <div style="font-size:32px;font-weight:800;color:var(--risk-high)">66.0%</div>
+          <div style="font-size:32px;font-weight:800;color:var(--risk-high)" id="zsum-a-rate">&mdash;</div>
           <div style="font-size:12px;color:#64748b;margin-bottom:12px">tasa de desercion real en este grupo</div>
           <div style="font-size:12px;color:#475569;line-height:1.6">
-            Score &ge; 50% &bull; 10,931 estudiantes<br>
+            <span id="zsum-a-info">&mdash;</span><br>
             <strong>Intervencion inmediata requerida</strong>
           </div>
         </div>
@@ -273,10 +273,10 @@
       <div class="chart-card" style="cursor:pointer;border:2px solid transparent;transition:border 0.2s" onclick="CF.set('zona','M','Riesgo Medio');this.style.borderColor='var(--risk-mid)'">
         <div class="chart-header"><div class="chart-title" style="color:var(--risk-mid);display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--risk-mid);flex-shrink:0"></span> Riesgo MEDIO</div></div>
         <div style="padding:8px 0">
-          <div style="font-size:32px;font-weight:800;color:var(--risk-mid)">17.5%</div>
+          <div style="font-size:32px;font-weight:800;color:var(--risk-mid)" id="zsum-m-rate">&mdash;</div>
           <div style="font-size:12px;color:#64748b;margin-bottom:12px">tasa de desercion real en este grupo</div>
           <div style="font-size:12px;color:#475569;line-height:1.6">
-            Score 25%–50% &bull; 13,236 estudiantes<br>
+            <span id="zsum-m-info">&mdash;</span><br>
             <strong>Seguimiento y apoyo preventivo</strong>
           </div>
         </div>
@@ -286,10 +286,10 @@
       <div class="chart-card" style="cursor:pointer;border:2px solid transparent;transition:border 0.2s" onclick="CF.set('zona','B','Riesgo Bajo');this.style.borderColor='var(--risk-low)'">
         <div class="chart-header"><div class="chart-title" style="color:var(--risk-low);display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--risk-low);flex-shrink:0"></span> Riesgo BAJO</div></div>
         <div style="padding:8px 0">
-          <div style="font-size:32px;font-weight:800;color:var(--risk-low)">7.2%</div>
+          <div style="font-size:32px;font-weight:800;color:var(--risk-low)" id="zsum-b-rate">&mdash;</div>
           <div style="font-size:12px;color:#64748b;margin-bottom:12px">tasa de desercion real en este grupo</div>
           <div style="font-size:12px;color:#475569;line-height:1.6">
-            Score &lt; 25% &bull; 4,208 estudiantes<br>
+            <span id="zsum-b-info">&mdash;</span><br>
             <strong>Monitoreo rutinario ordinario</strong>
           </div>
         </div>
@@ -753,7 +753,7 @@
         </div>
         <div class="insight-content">
           <h4>Modelo campeon: Ensemble (LR+RF+XGB)</h4>
-          <p>Mejor AUC-ROC (0.8461), F1=0.7014 y error de calibracion mas bajo (Brier=0.164). Combinacion de Regresion Logistica Ridge, Random Forest y XGBoost entrenados en cohortes 1-7.</p>
+          <p id="champ-desc">Combinacion de Regresion Logistica Ridge, Random Forest y XGBoost entrenados en cohortes 1-7.</p>
         </div>
       </div>
       <div class="insight-card success">
@@ -825,35 +825,35 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <div>
                 <span class="badge badge-alto">ALTO</span>
-                <span style="font-size:12px;color:#64748b;margin-left:8px">Score &ge; 50% &bull; 10,931 estudiantes (38.5%)</span>
+                <span style="font-size:12px;color:#64748b;margin-left:8px" id="zcal-a-info">&mdash;</span>
               </div>
-              <strong style="color:var(--risk-high)">66.0%</strong>
+              <strong style="color:var(--risk-high)" id="zcal-a-rate">&mdash;</strong>
             </div>
-            <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:66%;background:var(--risk-high)"></div></div>
+            <div class="progress-bar" style="height:10px"><div class="progress-fill" id="zcal-a-bar" style="width:0%;background:var(--risk-high)"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <div>
                 <span class="badge badge-medio">MEDIO</span>
-                <span style="font-size:12px;color:#64748b;margin-left:8px">Score 25%-50% &bull; 13,236 estudiantes (46.6%)</span>
+                <span style="font-size:12px;color:#64748b;margin-left:8px" id="zcal-m-info">&mdash;</span>
               </div>
-              <strong style="color:var(--risk-mid)">17.5%</strong>
+              <strong style="color:var(--risk-mid)" id="zcal-m-rate">&mdash;</strong>
             </div>
-            <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:17.5%;background:var(--risk-mid)"></div></div>
+            <div class="progress-bar" style="height:10px"><div class="progress-fill" id="zcal-m-bar" style="width:0%;background:var(--risk-mid)"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <div>
                 <span class="badge badge-bajo">BAJO</span>
-                <span style="font-size:12px;color:#64748b;margin-left:8px">Score &lt; 25% &bull; 4,208 estudiantes (14.8%)</span>
+                <span style="font-size:12px;color:#64748b;margin-left:8px" id="zcal-b-info">&mdash;</span>
               </div>
-              <strong style="color:var(--risk-low)">7.2%</strong>
+              <strong style="color:var(--risk-low)" id="zcal-b-rate">&mdash;</strong>
             </div>
-            <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:7.2%;background:var(--risk-low)"></div></div>
+            <div class="progress-bar" style="height:10px"><div class="progress-fill" id="zcal-b-bar" style="width:0%;background:var(--risk-low)"></div></div>
           </div>
           <div style="margin-top:8px;padding:10px;background:#f8fafc;border-radius:8px;font-size:12px;color:#475569;line-height:1.6">
             <strong>Umbral Youden (Ensemble):</strong> 0.4161, elegido en validacion interna limpia (cohorte 7, modelos replica entrenados en cohortes 1-6). Zonas operativas: Alto &ge;50%, Medio 25-50%, Bajo &lt;25%.<br>
-            <strong>Interpretacion:</strong> 2 de cada 3 estudiantes en zona Alta desertaron realmente. Solo 1 de cada 14 en zona Baja deserto.
+            <strong>Interpretacion:</strong> <span id="zcal-interp">&mdash;</span>
           </div>
         </div>
       </div>
